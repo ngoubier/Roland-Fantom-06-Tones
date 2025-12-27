@@ -1,0 +1,22 @@
+
+number,name,bank,category,toneType,msb,lsb,pc,keywords
+A001,AnalogAtmosphere,PR-A,Synth PolyKey,ZEN-Core,87,92,1,"analog,atmosphere,synth,poly"
+A002,Progre.Pluck Mod,PR-A,Synth PolyKey,ZEN-Core,87,92,2,"plucked,mod,progressive"
+A003,Stringbell Synth,PR-A,Synth PolyKey,ZEN-Core,87,92,3,"string,bell,synth"
+A004,P5 Soundtrack,PR-A,Synth PolyKey,ZEN-Core,87,92,4,"p5,soundtrack"
+A005,5th Ambi Pluck,PR-A,Synth PolyKey,ZEN-Core,87,92,5,"fifth,ambi,pluck"
+A006,Juno Poly Stack,PR-A,Synth PolyKey,ZEN-Core,87,92,6,"juno,poly,stack"
+A007,M/S Pulse/Mod,PR-A,Synth PolyKey,ZEN-Core,87,92,7,"modulation,pulse"
+A008,JUNO On Fire,PR-A,Synth PolyKey,ZEN-Core,87,92,8,"juno,on fire"
+A009,Future Poly/Mod,PR-A,Synth PolyKey,ZEN-Core,87,92,9,"future,poly,mod"
+A010,Synth Edge 1,PR-A,Synth PolyKey,ZEN-Core,87,92,10,"synth,edge"
+A011,Future Poly,PR-A,Synth PolyKey,ZEN-Core,87,92,11,"future,poly"
+A012,Future Sine Poly,PR-A,Synth PolyKey,ZEN-Core,87,92,12,"future,sine,poly"
+A013,Close to Lead,PR-A,Synth PolyKey,ZEN-Core,87,92,13,"close,lead"
+A014,Laser Sync Harp,PR-A,Synth PolyKey,ZEN-Core,87,92,14,"laser,sync,harp"
+A015,Broken Toys,PR-A,Synth PolyKey,ZEN-Core,87,92,15,"broken,toys"
+A016,Arise,PR-A,Synth PolyKey,ZEN-Core,87,92,16,arise
+A017,Ring Padding,PR-A,Synth PolyKey,ZEN-Core,87,92,17,"ring,padding"
+A018,JP8 X-MOD Magic,PR-A,Synth PolyKey,ZEN-Core,87,92,18,"jp8,x-mod,magic"
+A019,Heliosphere,PR-A,Synth PolyKey,ZEN-Core,87,92,19,heliosphere
+A020,Sweet Sustain,PR-A,Synth PolyKey,ZEN-Core,87,92,20,"sweet,sustain"
