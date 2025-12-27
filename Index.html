@@ -1,1 +1,285 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Roland FANTOM-06 – Liste des sons</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <style>
+    :root {
+      --bg: #0f172a;
+      --bg-alt: #020617;
+      --card: #020617;
+      --accent: #38bdf8;
+      --accent-soft: rgba(56, 189, 248, 0.15);
+      --border: #1e293b;
+      --text: #e5e7eb;
+      --text-muted: #9ca3af;
+      --danger: #f97373;
+    }
+    body {
+      margin: 0;
+      font-family: system-ui, sans-serif;
+      background: radial-gradient(circle at top, #1e293b 0, #020617 55%);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+    }
+    header { padding: 1.5rem; }
+    .title {
+      font-size: 1.4rem;
+      font-weight: 600;
+      text-transform: uppercase;
+    }
+    .badge {
+      font-size: .7rem;
+      border: 1px solid var(--accent);
+      padding: 2px 8px;
+      margin-left: 8px;
+      color: var(--accent);
+      background: var(--accent-soft);
+      border-radius: 999px;
+    }
+    main { padding: 1rem 1.5rem; flex: 1; }
+    .panel {
+      background: rgba(15,23,42,0.9);
+      border: 1px solid var(--border);
+      border-radius: 1rem;
+      padding: 1rem;
+      margin-bottom: 1rem;
+    }
+    .filters {
+      display: grid;
+      grid-template-columns: repeat(auto-fill,minmax(180px,1fr));
+      gap: .7rem;
+    }
+    .field { display: flex; flex-direction: column; }
+    .field input,.field select {
+      background: var(--bg-alt);
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: .4rem .7rem;
+      font-size: .85rem;
+      color: var(--text);
+    }
+    .table-wrapper {
+      border-radius: .9rem;
+      border: 1px solid var(--border);
+      overflow: hidden;
+      background: var(--bg-alt);
+    }
+    table { width: 100%; border-collapse: collapse; font-size: .83rem; }
+    th,td { padding: .45rem .6rem; white-space: nowrap; }
+    th {
+      background: #020617;
+      border-bottom: 1px solid var(--border);
+      font-size: .75rem;
+      text-transform: uppercase;
+      letter-spacing: .06em;
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    tbody tr:nth-child(even){ background: rgba(255,255,255,0.03);}
+    tbody tr:hover{ background: rgba(255,255,255,0.05);}
+    .pagination {
+      padding: .4rem .7rem;
+      font-size: .75rem;
+      display: flex; justify-content: space-between; flex-wrap: wrap;
+      border-top: 1px solid var(--border);
+    }
+    button {
+      border-radius: 999px;
+      border: 1px solid var(--border);
+      padding: .25rem .7rem;
+      background: #020617;
+      color: var(--text);
+      cursor: pointer;
+    }
+    button[disabled]{opacity:.4;cursor:default;}
+  </style>
+</head>
 
+<body>
+<header>
+  <div class="title">
+    Roland FANTOM-06
+    <span class="badge">Liste des sons</span>
+  </div>
+</header>
+
+<main>
+  <section class="panel">
+    <div class="filters">
+      <div class="field">
+        <label>Recherche</label>
+        <input id="search" placeholder="piano, strings, JP-8, brass…">
+      </div>
+      <div class="field">
+        <label>Banque</label>
+        <select id="bankFilter"><option value="">Toutes</option></select>
+      </div>
+      <div class="field">
+        <label>Catégorie</label>
+        <select id="categoryFilter"><option value="">Toutes</option></select>
+      </div>
+      <div class="field">
+        <label>Moteur</label>
+        <select id="toneTypeFilter"><option value="">Tous</option></select>
+      </div>
+    </div>
+    <button style="margin-top:.6rem" id="resetFilters">Réinitialiser</button>
+  </section>
+
+  <section class="panel">
+    <div class="table-wrapper">
+      <table id="tonesTable">
+        <thead>
+        <tr>
+          <th data-sort="number">N°</th>
+          <th data-sort="name">Nom</th>
+          <th data-sort="bank">Banque</th>
+          <th data-sort="category">Catégorie</th>
+          <th data-sort="toneType">Moteur</th>
+          <th data-sort="msb">MSB</th>
+          <th data-sort="lsb">LSB</th>
+          <th data-sort="pc">PC</th>
+          <th>Mots-clés</th>
+        </tr>
+        </thead>
+        <tbody></tbody>
+      </table>
+      <div class="pagination">
+        <span id="paginationInfo">0 résultat</span>
+        <div>
+          <label>par page</label>
+          <select id="pageSize">
+            <option>25</option><option selected>50</option><option>100</option>
+          </select>
+          <button id="prevPage">◀</button>
+          <button id="nextPage">▶</button>
+        </div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<script>
+let tones = [];
+const state = { search:"",bank:"",category:"",toneType:"",sortBy:"number",sortDir:"asc",page:1,pageSize:50 };
+
+const el = {
+  tbody: document.querySelector("#tonesTable tbody"),
+  head: document.querySelector("#tonesTable thead"),
+  info: document.querySelector("#paginationInfo"),
+  search: document.getElementById("search"),
+  bank: document.getElementById("bankFilter"),
+  cat: document.getElementById("categoryFilter"),
+  type: document.getElementById("toneTypeFilter"),
+  reset: document.getElementById("resetFilters"),
+  size: document.getElementById("pageSize"),
+  prev: document.getElementById("prevPage"),
+  next: document.getElementById("nextPage")
+};
+
+function parseCSV(text) {
+  const lines = text.trim().split("\n");
+  const headers = lines[0].split(",");
+  return lines.slice(1).map(line=>{
+    const cols = line.split(/,(?=(?:[^"]*"[^"]*")*[^"]*$)/);
+    const obj={};
+    headers.forEach((h,i)=>obj[h]=cols[i]?.replace(/^"|"$/g,"")||"");
+    return obj;
+  });
+}
+
+async function loadCSV(){
+  const res = await fetch("fantom06_sounds.csv");
+  const txt = await res.text();
+  tones = parseCSV(txt);
+  buildFilters();
+  render();
+}
+
+function buildFilters(){
+  const B=new Set(), C=new Set(), T=new Set();
+  tones.forEach(t=>{ if(t.bank)B.add(t.bank); if(t.category)C.add(t.category); if(t.toneType)T.add(t.toneType);});
+  [...B].sort().forEach(v=>el.bank.innerHTML+=`<option>${v}</option>`);
+  [...C].sort().forEach(v=>el.cat.innerHTML+=`<option>${v}</option>`);
+  [...T].sort().forEach(v=>el.type.innerHTML+=`<option>${v}</option>`);
+}
+
+function normalize(s){ return (s||"").toLowerCase(); }
+
+function applyFilters(list){
+  return list.filter(t=>{
+    if(state.bank && t.bank!==state.bank)return false;
+    if(state.category && t.category!==state.category)return false;
+    if(state.toneType && t.toneType!==state.toneType)return false;
+    const q = normalize(state.search);
+    if(!q) return true;
+    return normalize(`${t.name} ${t.number} ${t.keywords}`).includes(q);
+  });
+}
+
+function sort(list){
+  return [...list].sort((a,b)=>{
+    let va=a[state.sortBy], vb=b[state.sortBy];
+    if(["msb","lsb","pc"].includes(state.sortBy)){ va=+va||0; vb=+vb||0;}
+    else{ va=normalize(va); vb=normalize(vb);}
+    return state.sortDir==="asc" ? va>vb?1:-1 : va<vb?1:-1;
+  });
+}
+
+function paginate(list){
+  const total=list.length;
+  const max=Math.ceil(total/state.pageSize)||1;
+  if(state.page>max)state.page=max;
+  const s=(state.page-1)*state.pageSize, e=s+state.pageSize;
+  return { total,max,items:list.slice(s,e) };
+}
+
+function render(){
+  const f=applyFilters(tones);
+  const s=sort(f);
+  const {total,max,items}=paginate(s);
+  el.tbody.innerHTML = items.map(t=>`
+<tr>
+<td>${t.number}</td>
+<td>${t.name}</td>
+<td>${t.bank}</td>
+<td>${t.category}</td>
+<td>${t.toneType}</td>
+<td>${t.msb}</td>
+<td>${t.lsb}</td>
+<td>${t.pc}</td>
+<td>${t.keywords}</td>
+</tr>`).join("");
+  el.info.textContent = total===0?"Aucun résultat":`${(state.page-1)*state.pageSize+1}–${Math.min(total,state.page*state.pageSize)} / ${total}`;
+  el.prev.disabled=state.page<=1;
+  el.next.disabled=state.page>=max;
+}
+
+el.search.oninput=e=>(state.search=e.target.value,state.page=1,render());
+el.bank.onchange=e=>(state.bank=e.target.value,state.page=1,render());
+el.cat.onchange=e=>(state.category=e.target.value,state.page=1,render());
+el.type.onchange=e=>(state.toneType=e.target.value,state.page=1,render());
+el.size.onchange=e=>(state.pageSize=+e.target.value,state.page=1,render());
+el.prev.onclick=()=>{state.page--;render();};
+el.next.onclick=()=>{state.page++;render();};
+el.reset.onclick=()=>{
+  state.search="";state.bank="";state.category="";state.toneType="";state.page=1;
+  el.search.value="";el.bank.value="";el.cat.value="";el.type.value="";
+  render();
+};
+
+el.head.addEventListener("click",e=>{
+  const th=e.target.closest("th[data-sort]"); if(!th) return;
+  const key=th.dataset.sort;
+  state.sortDir = state.sortBy===key && state.sortDir==="asc" ? "desc" : "asc";
+  state.sortBy=key; state.page=1; render();
+});
+
+loadCSV();
+</script>
+</body>
+</html>
